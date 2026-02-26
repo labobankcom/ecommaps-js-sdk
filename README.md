@@ -129,6 +129,16 @@ To build a complete store:
 
 ---
 
+## 🌍 Universal Compatibility
+
+The Ecommaps SDK is built using standard Fetch API and is environment-agnostic. It works seamlessly across:
+- **Web Frameworks**: React, Next.js, Vue, Nuxt, Svelte, Angular.
+- **Mobile**: React Native, Expo, Ionic.
+- **Server-side**: Node.js, Bun, Deno, Edge Functions (Vercel, Cloudflare).
+- **AI Agents**: Highly optimized for AI-driven development and autonomous agents.
+
+---
+
 ## 📄 License
 
 Distributed under the ISC License. © 2026 ecommaps.com
