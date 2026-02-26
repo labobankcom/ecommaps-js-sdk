@@ -26,7 +26,7 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 
 // src/client.ts
-var API_URL = process.env.NEXT_PUBLIC_ECOMMAPS_API_URL || "http://127.0.0.1:8001/api/v1/storefront";
+var API_URL = process.env.NEXT_PUBLIC_ECOMMAPS_API_URL || "https://api.ecommaps.com/api/v1/storefront";
 var API_KEY = process.env.ECOMMAPS_API_KEY || "";
 var EcommapsAPIError = class extends Error {
   status;

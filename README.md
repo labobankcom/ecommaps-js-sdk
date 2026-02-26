@@ -25,7 +25,7 @@ The client automatically reads from environment variables but can also be config
 import { ecommapsClient } from "@ecommaps/client";
 
 // Set these in your .env
-// NEXT_PUBLIC_ECOMMAPS_API_URL=http://localhost:8001/api/v1/storefront
+// NEXT_PUBLIC_ECOMMAPS_API_URL=https://api.ecommaps.com/api/v1/storefront
 // ECOMMAPS_API_KEY=your_store_key
 ```
 

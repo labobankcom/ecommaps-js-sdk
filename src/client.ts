@@ -8,7 +8,7 @@ import {
 
 const API_URL =
     process.env.NEXT_PUBLIC_ECOMMAPS_API_URL ||
-    "http://127.0.0.1:8001/api/v1/storefront"
+    "https://api.ecommaps.com/api/v1/storefront"
 const API_KEY = process.env.ECOMMAPS_API_KEY || ""
 
 export class EcommapsAPIError extends Error {
