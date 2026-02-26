@@ -1,0 +1,21 @@
+{
+  "name": "@ecommaps/client",
+  "version": "1.2.2",
+  "description": "The official JS SDK for Ecommaps Headless Storefronts.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist node_modules"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.0",
+    "tsup": "^8.0.2",
+    "typescript": "^5.4.5"
+  },
+  "author": "EcoBaseAI",
+  "license": "ISC"
+}
