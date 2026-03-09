@@ -1,3 +1,18 @@
+export interface EcommapsMenuItem {
+    title: string
+    url: string | null
+    type?: string | null
+    position?: number
+    children?: EcommapsMenuItem[]
+}
+
+export interface EcommapsMenu {
+    id: string
+    title: string
+    handle: string
+    items: EcommapsMenuItem[]
+}
+
 export interface EcommapsSite {
     id: string
     name: string
@@ -50,6 +65,8 @@ export interface EcommapsProduct {
     variants: any | null
     charge_tax: boolean | null
     is_physical: boolean | null
+    discounted_price?: number
+    discount_text?: string
 }
 
 export interface EcommapsCollection {
@@ -110,4 +127,33 @@ export interface EcommapsCustomer {
 export interface EcommapsAuthResponse {
     token: string
     user: EcommapsCustomer
+}
+
+export interface EcommapsSearchResponse {
+    data: EcommapsProduct[]
+    query: string
+    pagination: PaginationMeta
+}
+
+export interface EcommapsAppliedDiscount {
+    id?: string
+    code?: string
+    discount_type?: "percentage" | "fixed_amount" | "free_shipping"
+    discount_value?: number
+    discount_amount?: number
+    promotion_type?: string
+    target_type?: string
+    message?: string
+}
+
+export interface EcommapsCouponValidateResponse {
+    valid: boolean
+    applied_discounts?: EcommapsAppliedDiscount[]
+    code?: string
+    discount_type?: "percentage" | "fixed_amount" | "free_shipping"
+    discount_value?: number
+    discount_amount?: number
+    target_type?: string
+    promotion_type?: string
+    message?: string
 }

@@ -35,7 +35,17 @@ async function ecommapsFetch(endpoint, options) {
 var ecommapsClient = {
   store: {
     retrieve: (options) => ecommapsFetch("/store", options),
-    menus: (options) => ecommapsFetch("/store/menus", options)
+    menus: {
+      list: (options) => ecommapsFetch("/store/menus", options),
+      retrieve: (handle, options) => ecommapsFetch(`/store/menus/${handle}`, options)
+    },
+    coupons: {
+      validate: (body, options) => ecommapsFetch("/coupons/validate", {
+        ...options,
+        method: "POST",
+        body: JSON.stringify(body)
+      })
+    }
   },
   products: {
     list: (params, options) => {
@@ -52,7 +62,22 @@ var ecommapsClient = {
         options
       );
     },
-    retrieve: (slug, options) => ecommapsFetch(`/products/${slug}`, options)
+    retrieve: (slug, options) => ecommapsFetch(`/products/${slug}`, options),
+    search: (q, params, options) => {
+      const query = new URLSearchParams();
+      query.append("q", q);
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== void 0 && value !== null) {
+            query.append(key, String(value));
+          }
+        });
+      }
+      return ecommapsFetch(
+        `/search?${query.toString()}`,
+        options
+      );
+    }
   },
   collections: {
     list: (options) => ecommapsFetch("/collections", options),
@@ -107,6 +132,14 @@ var ecommapsClient = {
       ...options,
       method: "POST",
       body: JSON.stringify(body)
+    }),
+    setDefaultAddress: (addressId, options) => ecommapsFetch(`/auth/me/addresses/${addressId}/default`, {
+      ...options,
+      method: "PATCH"
+    }),
+    deleteAddress: (addressId, options) => ecommapsFetch(`/auth/me/addresses/${addressId}`, {
+      ...options,
+      method: "DELETE"
     })
   }
 };

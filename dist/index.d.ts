@@ -1,3 +1,16 @@
+interface EcommapsMenuItem {
+    title: string;
+    url: string | null;
+    type?: string | null;
+    position?: number;
+    children?: EcommapsMenuItem[];
+}
+interface EcommapsMenu {
+    id: string;
+    title: string;
+    handle: string;
+    items: EcommapsMenuItem[];
+}
 interface EcommapsSite {
     id: string;
     name: string;
@@ -48,6 +61,8 @@ interface EcommapsProduct {
     variants: any | null;
     charge_tax: boolean | null;
     is_physical: boolean | null;
+    discounted_price?: number;
+    discount_text?: string;
 }
 interface EcommapsCollection {
     id: string;
@@ -102,6 +117,32 @@ interface EcommapsAuthResponse {
     token: string;
     user: EcommapsCustomer;
 }
+interface EcommapsSearchResponse {
+    data: EcommapsProduct[];
+    query: string;
+    pagination: PaginationMeta;
+}
+interface EcommapsAppliedDiscount {
+    id?: string;
+    code?: string;
+    discount_type?: "percentage" | "fixed_amount" | "free_shipping";
+    discount_value?: number;
+    discount_amount?: number;
+    promotion_type?: string;
+    target_type?: string;
+    message?: string;
+}
+interface EcommapsCouponValidateResponse {
+    valid: boolean;
+    applied_discounts?: EcommapsAppliedDiscount[];
+    code?: string;
+    discount_type?: "percentage" | "fixed_amount" | "free_shipping";
+    discount_value?: number;
+    discount_amount?: number;
+    target_type?: string;
+    promotion_type?: string;
+    message?: string;
+}
 
 declare class EcommapsAPIError extends Error {
     status: number;
@@ -110,11 +151,22 @@ declare class EcommapsAPIError extends Error {
 declare const ecommapsClient: {
     store: {
         retrieve: (options?: RequestInit) => Promise<EcommapsSite>;
-        menus: (options?: RequestInit) => Promise<any>;
+        menus: {
+            list: (options?: RequestInit) => Promise<EcommapsMenu[]>;
+            retrieve: (handle: string, options?: RequestInit) => Promise<EcommapsMenu>;
+        };
+        coupons: {
+            validate: (body: {
+                code: string;
+                cart_total?: number;
+                items?: any[];
+            }, options?: RequestInit) => Promise<EcommapsCouponValidateResponse>;
+        };
     };
     products: {
         list: (params?: Record<string, string | number>, options?: RequestInit) => Promise<PaginatedResponse<EcommapsProduct>>;
         retrieve: (slug: string, options?: RequestInit) => Promise<EcommapsProduct>;
+        search: (q: string, params?: Record<string, string | number>, options?: RequestInit) => Promise<EcommapsSearchResponse>;
     };
     collections: {
         list: (options?: RequestInit) => Promise<{
@@ -162,7 +214,15 @@ declare const ecommapsClient: {
             success: boolean;
             address: any;
         }>;
+        setDefaultAddress: (addressId: string, options?: RequestInit) => Promise<{
+            success: boolean;
+            addresses: any[];
+        }>;
+        deleteAddress: (addressId: string, options?: RequestInit) => Promise<{
+            success: boolean;
+            addresses: any[];
+        }>;
     };
 };
 
-export { EcommapsAPIError, type EcommapsAuthResponse, type EcommapsCart, type EcommapsCartItem, type EcommapsCollection, type EcommapsCustomer, type EcommapsProduct, type EcommapsProductVariant, type EcommapsSite, type PaginatedResponse, type PaginationMeta, ecommapsClient };
+export { EcommapsAPIError, type EcommapsAppliedDiscount, type EcommapsAuthResponse, type EcommapsCart, type EcommapsCartItem, type EcommapsCollection, type EcommapsCouponValidateResponse, type EcommapsCustomer, type EcommapsMenu, type EcommapsMenuItem, type EcommapsProduct, type EcommapsProductVariant, type EcommapsSearchResponse, type EcommapsSite, type PaginatedResponse, type PaginationMeta, ecommapsClient };

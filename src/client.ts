@@ -3,7 +3,9 @@ import {
     EcommapsCollection,
     EcommapsSite,
     EcommapsCart,
+    EcommapsMenu,
     PaginatedResponse,
+    EcommapsCouponValidateResponse,
 } from "./types"
 
 const API_URL =
@@ -55,7 +57,18 @@ async function ecommapsFetch<T>(
 export const ecommapsClient = {
     store: {
         retrieve: (options?: RequestInit) => ecommapsFetch<EcommapsSite>("/store", options),
-        menus: (options?: RequestInit) => ecommapsFetch<any>("/store/menus", options),
+        menus: {
+            list: (options?: RequestInit) => ecommapsFetch<EcommapsMenu[]>("/store/menus", options),
+            retrieve: (handle: string, options?: RequestInit) => ecommapsFetch<EcommapsMenu>(`/store/menus/${handle}`, options),
+        },
+        coupons: {
+            validate: (body: { code: string, cart_total?: number, items?: any[] }, options?: RequestInit) =>
+                ecommapsFetch<EcommapsCouponValidateResponse>("/coupons/validate", {
+                    ...options,
+                    method: "POST",
+                    body: JSON.stringify(body),
+                }),
+        }
     },
     products: {
         list: (params?: Record<string, string | number>, options?: RequestInit) => {
@@ -74,6 +87,21 @@ export const ecommapsClient = {
         },
         retrieve: (slug: string, options?: RequestInit) =>
             ecommapsFetch<EcommapsProduct>(`/products/${slug}`, options),
+        search: (q: string, params?: Record<string, string | number>, options?: RequestInit) => {
+            const query = new URLSearchParams()
+            query.append("q", q)
+            if (params) {
+                Object.entries(params).forEach(([key, value]) => {
+                    if (value !== undefined && value !== null) {
+                        query.append(key, String(value))
+                    }
+                })
+            }
+            return ecommapsFetch<import("./types").EcommapsSearchResponse>(
+                `/search?${query.toString()}`,
+                options
+            )
+        },
     },
     collections: {
         list: (options?: RequestInit) => ecommapsFetch<{ data: EcommapsCollection[] }>("/collections", options),
@@ -144,6 +172,16 @@ export const ecommapsClient = {
                 ...options,
                 method: "POST",
                 body: JSON.stringify(body),
+            }),
+        setDefaultAddress: (addressId: string, options?: RequestInit) =>
+            ecommapsFetch<{ success: boolean; addresses: any[] }>(`/auth/me/addresses/${addressId}/default`, {
+                ...options,
+                method: "PATCH",
+            }),
+        deleteAddress: (addressId: string, options?: RequestInit) =>
+            ecommapsFetch<{ success: boolean; addresses: any[] }>(`/auth/me/addresses/${addressId}`, {
+                ...options,
+                method: "DELETE",
             }),
     },
 }
