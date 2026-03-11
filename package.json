@@ -23,6 +23,7 @@
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint src/",
     "clean": "rm -rf dist node_modules"
   },
@@ -47,5 +48,6 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  }
+  },
+  "packageManager": "pnpm@10.28.0"
 }

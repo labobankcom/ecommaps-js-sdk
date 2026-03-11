@@ -2,6 +2,18 @@
 
 Official TypeScript SDK for Ecommaps storefront APIs.
 
+![npm version](https://img.shields.io/npm/v/@ecommaps/client)
+![npm downloads](https://img.shields.io/npm/dm/@ecommaps/client)
+
+## Release status (source of truth)
+
+- Canonical package version is the npm registry version.
+- Verify current published version with:
+
+```bash
+npm view @ecommaps/client version
+```
+
 ## 1. Positioning
 
 `@ecommaps/client` is the Core API SDK layer.
