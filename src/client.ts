@@ -1,4 +1,5 @@
 import {
+  EcommapsCreateOrderRequest,
   EcommapsAuthResponse,
   EcommapsBlog,
   EcommapsCart,
@@ -6,6 +7,7 @@ import {
   EcommapsCouponValidateResponse,
   EcommapsCustomer,
   EcommapsMenu,
+  EcommapsOrder,
   EcommapsPage,
   EcommapsProduct,
   EcommapsSearchResponse,
@@ -66,9 +68,9 @@ export interface EcommapsClient {
     removeItem: (cartId: string, itemId: string, options?: RequestInit) => Promise<EcommapsCart>;
   };
   orders: {
-    create: (body: unknown, options?: RequestInit) => Promise<unknown>;
-    retrieve: (orderNumber: string, options?: RequestInit) => Promise<unknown>;
-    list: (options?: RequestInit & { params?: { limit?: number; offset?: number } }) => Promise<{ data: unknown[]; pagination: unknown }>;
+    create: (body: EcommapsCreateOrderRequest, options?: RequestInit) => Promise<EcommapsOrder>;
+    retrieve: (orderNumber: string, options?: RequestInit) => Promise<EcommapsOrder>;
+    list: (options?: RequestInit & { params?: { limit?: number; offset?: number } }) => Promise<{ data: EcommapsOrder[]; pagination: unknown }>;
   };
   auth: {
     login: (body: unknown, options?: RequestInit) => Promise<EcommapsAuthResponse>;
@@ -290,13 +292,22 @@ export function createEcommapsClient(config: EcommapsClientConfig = {}): Ecommap
         }),
     },
     orders: {
-      create: (body: unknown, options?: RequestInit) =>
-        ecommapsFetch<unknown>("/orders", {
+      create: (body: EcommapsCreateOrderRequest, options?: RequestInit) =>
+        ecommapsFetch<EcommapsOrder>("/orders", {
           ...options,
           method: "POST",
           body: JSON.stringify(body),
         }),
-      retrieve: (orderNumber: string, options?: RequestInit) => ecommapsFetch<unknown>(`/orders/${orderNumber}`, options),
+      retrieve: async (orderNumber: string, options?: RequestInit) => {
+        try {
+          return await ecommapsFetch<EcommapsOrder>(`/orders/track/${orderNumber}`, options);
+        } catch (error) {
+          if (error instanceof EcommapsAPIError && error.status === 404) {
+            return ecommapsFetch<EcommapsOrder>(`/orders/${orderNumber}`, options);
+          }
+          throw error;
+        }
+      },
       list: async (options?: RequestInit & { params?: { limit?: number; offset?: number } }) => {
         const payload = await ecommapsFetch<unknown>(
           buildEndpoint("/orders", {
@@ -306,9 +317,10 @@ export function createEcommapsClient(config: EcommapsClientConfig = {}): Ecommap
           options,
         );
         if (payload && typeof payload === "object" && Array.isArray((payload as { data?: unknown[] }).data)) {
-          return payload as { data: unknown[]; pagination: unknown };
+          const result = payload as { data: EcommapsOrder[]; pagination: unknown };
+          return result;
         }
-        return { data: [], pagination: null };
+        return { data: [] as EcommapsOrder[], pagination: null };
       },
     },
     auth: {

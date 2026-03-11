@@ -89,8 +89,15 @@ const cart = await ecommapsClient.cart.create();
 await ecommapsClient.cart.addItem(cart.id, { product_id: "product_uuid", variant_id: "variant_uuid", quantity: 1 });
 await ecommapsClient.cart.retrieve(cart.id);
 await ecommapsClient.orders.create({ cart_id: cart.id, customer_name: "Name", customer_phone: "0555000000" });
+await ecommapsClient.orders.retrieve("ECORD-123456");
 await ecommapsClient.auth.login({ email: "user@mail.com", password: "secret" });
 ```
+
+Order creation is strongly typed via `EcommapsCreateOrderRequest` and supports optional fields such as:
+- `customer_email`
+- `shipping_address`
+- `coupon_code`
+- `shipping_cost`
 
 ## 5. Error handling
 

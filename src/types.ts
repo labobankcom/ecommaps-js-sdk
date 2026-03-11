@@ -246,3 +246,31 @@ export interface EcommapsCouponValidateResponse {
   promotion_type?: EcommapsPromotionType;
   message?: string;
 }
+
+export interface EcommapsCreateOrderRequest {
+  cart_id: string;
+  customer_name: string;
+  customer_phone: string;
+  customer_email?: string;
+  customer_wilaya?: string;
+  customer_commune?: string;
+  shipping_address?: Record<string, string>;
+  payment_method?: string;
+  customer_notes?: string;
+  coupon_code?: string;
+  shipping_cost?: number;
+}
+
+export interface EcommapsOrder {
+  id: string;
+  order_number?: string | null;
+  cart_id?: string | null;
+  site_id?: string | null;
+  status?: string | null;
+  total?: number | null;
+  subtotal?: number | null;
+  currency?: string | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  [key: string]: JsonValue;
+}
