@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.4.1
+
+- Fixed published package metadata links to point to the public SDK repository:
+  - `repository`
+  - `homepage`
+  - `bugs`
+
 ## 1.4.0
 
 - Added `createEcommapsClient(config)` factory.
