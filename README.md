@@ -1,144 +1,114 @@
 # @ecommaps/client
 
-[![NPM Version](https://img.shields.io/npm/v/@ecommaps/client)](https://www.npmjs.com/package/@ecommaps/client)
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+Official TypeScript SDK for Ecommaps storefront APIs.
 
-The official, high-performance JavaScript/TypeScript SDK for building custom, headless storefronts on the **Ecommaps** ecosystem. Specifically tailored for the **Algerian (DZ)**, **North African (MENA)**, and **Middle Eastern** e-commerce markets. Designed for developers and AI agents to build, scale, and manage modern commerce experiences with sub-second performance and local feature support (DZD currency, local addresses, and region-specific logic).
+## 1. Positioning
 
----
+`@ecommaps/client` is the Core API SDK layer.
 
-## 🚀 Quick Start
+Use this package when you need:
+- direct access to Storefront endpoints
+- strongly typed contracts for products, cart, auth, pages, blogs, and coupons
+- environment-agnostic API consumption in Next.js, Node.js, Edge, or workers
 
-### Installation
+If you need commerce logic (variant resolver, promotion classifier), use `@ecommaps/storefront-kit`.
+
+## 2. Installation
 
 ```bash
-npm install @ecommaps/client
-# or
 pnpm add @ecommaps/client
 ```
 
-### Configuration
+## 3. Configuration
 
-The client automatically reads from environment variables but can also be configured per request.
+### Environment variables
 
-```typescript
+```env
+NEXT_PUBLIC_ECOMMAPS_API_URL=https://api.ecommaps.com/api/v1/storefront
+ECOMMAPS_API_KEY=your_storefront_api_key
+```
+
+### Default singleton client
+
+```ts
 import { ecommapsClient } from "@ecommaps/client";
-
-// Set these in your .env
-// NEXT_PUBLIC_ECOMMAPS_API_URL=https://api.ecommaps.com/api/v1/storefront
-// ECOMMAPS_API_KEY=your_store_key
 ```
 
----
+### Factory client
 
-## 🛠 Features & Examples
+```ts
+import { createEcommapsClient } from "@ecommaps/client";
 
-### 🔐 Authentication & Customer Profile
-Handle customer sessions using industry-standard JWT.
-
-```typescript
-// Login
-const { token, user } = await ecommapsClient.auth.login({ 
-  email: "customer@example.com", 
-  password: "secure_password" 
-});
-
-// Get Current User Profile (Authenticated)
-const { customer } = await ecommapsClient.auth.me({
-  headers: { Authorization: `Bearer ${token}` }
-});
-
-// Add Address to Customer Profile
-await ecommapsClient.auth.addAddress({
-  line1: "123 Main St",
-  city: "Algiers",
-  state: "16",
-  country: "DZ",
-  postal_code: "16000",
-  phone: "0555000000",
-  label: "Home"
-}, {
-  headers: { Authorization: `Bearer ${token}` }
+const client = createEcommapsClient({
+  apiUrl: "https://api.ecommaps.com/api/v1/storefront",
+  apiKey: process.env.ECOMMAPS_API_KEY!,
 });
 ```
 
-### 📦 Products & Collections
-Retrieve catalog data with built-in pagination.
+## 4. API Surface
 
-```typescript
-// List Products
-const products = await ecommapsClient.products.list({ limit: 10, offset: 0 });
+### Store
 
-// Retrieve Single Product by Slug
-const product = await ecommapsClient.products.retrieve("summer-t-shirt");
-
-// List Collections
-const { data: collections } = await ecommapsClient.collections.list();
+```ts
+await ecommapsClient.store.retrieve();
+await ecommapsClient.store.menus.list();
+await ecommapsClient.store.menus.retrieve("main-menu");
+await ecommapsClient.store.pages.list();
+await ecommapsClient.store.pages.retrieve("refund");
+await ecommapsClient.store.blogs.list();
+await ecommapsClient.store.blogs.retrieve("new-arrivals");
+await ecommapsClient.store.coupons.validate({ code: "DISCOUNT20", cart_total: 10000, items: [] });
 ```
 
-### 🛒 Cart Management
-Highly flexible cart APIs optimized for sub-second performance.
+### Products / Collections
 
-```typescript
-// Create a new Cart
+```ts
+await ecommapsClient.products.list({ limit: 12, offset: 0 });
+await ecommapsClient.products.retrieve("product-slug");
+await ecommapsClient.products.search("shirt", { limit: 10 });
+await ecommapsClient.collections.list();
+await ecommapsClient.collections.retrieve("menswear", 20, 0);
+```
+
+### Cart / Orders / Auth
+
+```ts
 const cart = await ecommapsClient.cart.create();
-
-// Add Item
-await ecommapsClient.cart.addItem(cart.id, {
-  product_id: "prod_123",
-  quantity: 2
-});
-
-// Retrieve Cart
-const currentCart = await ecommapsClient.cart.retrieve(cart.id);
+await ecommapsClient.cart.addItem(cart.id, { product_id: "product_uuid", variant_id: "variant_uuid", quantity: 1 });
+await ecommapsClient.cart.retrieve(cart.id);
+await ecommapsClient.orders.create({ cart_id: cart.id, customer_name: "Name", customer_phone: "0555000000" });
+await ecommapsClient.auth.login({ email: "user@mail.com", password: "secret" });
 ```
 
-### 🧾 Orders
-Seamless order management from creation to tracking.
+## 5. Error handling
 
-```typescript
-// List Customer Orders (Authenticated)
-const { data: orders } = await ecommapsClient.orders.list({
-  headers: { Authorization: `Bearer ${token}` },
-  params: { limit: 5 }
-});
+All non-2xx responses throw `EcommapsAPIError`:
 
-// Retrieve Order Details
-const order = await ecommapsClient.orders.retrieve("ECORD-2024-XXXX");
+```ts
+import { EcommapsAPIError } from "@ecommaps/client";
+
+try {
+  await ecommapsClient.products.retrieve("missing");
+} catch (error) {
+  if (error instanceof EcommapsAPIError) {
+    console.error(error.status, error.message);
+  }
+}
 ```
 
----
+## 6. Compatibility
 
-## 🤖 AI Agent Integration (Skills)
+- Runtime: Node.js 20+
+- Module formats: ESM + CJS
+- TypeScript: full declaration files included
+- Backward compatibility: `ecommapsClient` default singleton remains supported
 
-This SDK is **Agent-Ready**. If you are an AI agent building for a user, follow these conventions:
+## 7. Migration
 
-1. **Mapping**: Always map the backend JSON structure to the UI components (e.g., Use `line1` for `address_1`, `name` for `title`).
-2. **Context**: Use `ecommapsClient.auth.me` to verify user status before attempting protected operations.
-3. **Optimistic UI**: Use the returned data from cart/order operations to update local state immediately.
+See [MIGRATION.md](./MIGRATION.md).
 
----
+## 8. Release policy
 
-## 🏗 Developing the Storefront
-
-To build a complete store:
-1. Initialize a Next.js 14+ project.
-2. Install `@ecommaps/client`.
-3. Use Next.js **Server Actions** to wrap SDK calls (see `auth` and `cart`).
-4. Implement **Dynamic Routing** (`/[slug]`) using `products.retrieve`.
-
----
-
-## 🌍 Universal Compatibility
-
-The Ecommaps SDK is built using standard Fetch API and is environment-agnostic. It works seamlessly across:
-- **Web Frameworks**: React, Next.js, Vue, Nuxt, Svelte, Angular.
-- **Mobile**: React Native, Expo, Ionic.
-- **Server-side**: Node.js, Bun, Deno, Edge Functions (Vercel, Cloudflare).
-- **AI Agents**: Highly optimized for AI-driven development and autonomous agents.
-
----
-
-## 📄 License
-
-Distributed under the ISC License. © 2026 ecommaps.com
+- Semver is enforced.
+- Breaking changes are released only in major versions.
+- Every published change must include changelog notes.

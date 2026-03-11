@@ -1,3 +1,10 @@
+type JsonPrimitive = string | number | boolean | null | undefined;
+type JsonValue = JsonPrimitive | JsonValue[] | {
+    [key: string]: JsonValue;
+};
+type JsonRecord = {
+    [key: string]: JsonValue;
+};
 interface EcommapsMenuItem {
     title: string;
     url: string | null;
@@ -18,19 +25,45 @@ interface EcommapsSite {
     description: string | null;
     logo_url: string | null;
     custom_domain: string | null;
-    theme: any | null;
-    theme_settings: any | null;
-    settings: any | null;
-    contact_info: any | null;
-    social_links: any | null;
+    theme: JsonRecord | null;
+    theme_settings: JsonRecord | null;
+    settings: JsonRecord | null;
+    contact_info: JsonRecord | null;
+    social_links: JsonValue[] | null;
+    currency?: string | null;
+    primary_color?: string | null;
+    shipping_providers?: string[] | null;
+    shipping_companies?: string[] | null;
+    shipping_methods?: string[] | null;
+}
+interface EcommapsImage {
+    id?: string | null;
+    url?: string | null;
+    src?: string | null;
+    image_url?: string | null;
+    alt?: string | null;
+    position?: number | null;
+    [key: string]: JsonValue;
+}
+interface EcommapsProductOption {
+    name: string;
+    values: string[];
 }
 interface EcommapsProductVariant {
-    title: string;
-    prices: any[];
-    options: any[];
-    inventory_quantity: number;
+    id: string;
+    title: string | null;
     sku: string | null;
-    id?: string;
+    barcode?: string | null;
+    price: number | null;
+    base_price?: number | null;
+    compare_at_price?: number | null;
+    inventory_quantity: number | null;
+    in_stock?: boolean | null;
+    option_values?: Record<string, string>;
+    options?: string[] | Record<string, string> | null;
+    image_url?: string | null;
+    images?: (string | EcommapsImage)[] | null;
+    prices?: JsonValue[] | null;
 }
 interface EcommapsProduct {
     id: string;
@@ -41,7 +74,7 @@ interface EcommapsProduct {
     price: number;
     compare_at_price: number | null;
     currency: string | null;
-    images: any | null;
+    images: (string | EcommapsImage)[] | null;
     category: string | null;
     tags: string[] | null;
     inventory_quantity: number | null;
@@ -57,10 +90,11 @@ interface EcommapsProduct {
     weight_unit: string | null;
     vendor: string | null;
     product_type: string | null;
-    options: any | null;
-    variants: any | null;
+    options: EcommapsProductOption[] | null;
+    variants: EcommapsProductVariant[] | null;
     charge_tax: boolean | null;
     is_physical: boolean | null;
+    in_stock?: boolean | null;
     discounted_price?: number;
     discount_text?: string;
 }
@@ -75,6 +109,34 @@ interface EcommapsCollection {
     sort_order: string | null;
     created_at: string;
     updated_at: string;
+}
+interface EcommapsPage {
+    id: string;
+    title: string;
+    slug: string;
+    description: string | null;
+    excerpt?: string | null;
+    body?: string | null;
+    content?: JsonRecord | string | null;
+    is_published?: boolean;
+    featured_image?: string | null;
+    image_url?: string | null;
+    created_at?: string | null;
+    updated_at?: string | null;
+}
+interface EcommapsBlog {
+    id: string;
+    title: string;
+    slug: string;
+    description?: string | null;
+    excerpt?: string | null;
+    body?: string | null;
+    content?: JsonRecord | string | null;
+    image_url?: string | null;
+    featured_image?: string | null;
+    is_published?: boolean;
+    created_at?: string | null;
+    updated_at?: string | null;
 }
 interface PaginationMeta {
     total: number;
@@ -95,6 +157,7 @@ interface EcommapsCartItem {
     product_image: string | null;
     quantity: number;
     subtotal: number;
+    variant_options?: Record<string, string>;
 }
 interface EcommapsCart {
     id: string;
@@ -104,13 +167,27 @@ interface EcommapsCart {
     subtotal: number;
     created_at: string | null;
 }
+interface EcommapsAddress {
+    id?: string;
+    label?: string | null;
+    title?: string | null;
+    line1?: string | null;
+    line2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    country?: string | null;
+    postal_code?: string | null;
+    phone?: string | null;
+    is_default?: boolean;
+    [key: string]: JsonValue;
+}
 interface EcommapsCustomer {
     id: string;
     store_id: string;
     email: string;
     full_name: string;
     phone: string | null;
-    addresses: any[];
+    addresses: EcommapsAddress[];
     created_at: string;
 }
 interface EcommapsAuthResponse {
@@ -122,33 +199,46 @@ interface EcommapsSearchResponse {
     query: string;
     pagination: PaginationMeta;
 }
-interface EcommapsAppliedDiscount {
+type EcommapsDiscountType = "percentage" | "fixed_amount" | "free_shipping";
+type EcommapsPromotionTargetType = "store" | "products" | "collections";
+type EcommapsPromotionType = "automatic" | "coupon" | "manual" | string;
+interface EcommapsPromotion {
     id?: string;
-    code?: string;
-    discount_type?: "percentage" | "fixed_amount" | "free_shipping";
+    code?: string | null;
+    title?: string | null;
+    message?: string | null;
+    discount_type?: EcommapsDiscountType;
     discount_value?: number;
     discount_amount?: number;
-    promotion_type?: string;
-    target_type?: string;
-    message?: string;
+    min_order_amount?: number | null;
+    max_discount_amount?: number | null;
+    starts_at?: string | null;
+    expires_at?: string | null;
+    promotion_type?: EcommapsPromotionType;
+    target_type?: EcommapsPromotionTargetType | string;
+    target_ids?: string[];
 }
 interface EcommapsCouponValidateResponse {
     valid: boolean;
-    applied_discounts?: EcommapsAppliedDiscount[];
+    applied_discounts?: EcommapsPromotion[];
     code?: string;
-    discount_type?: "percentage" | "fixed_amount" | "free_shipping";
+    discount_type?: EcommapsDiscountType;
     discount_value?: number;
     discount_amount?: number;
-    target_type?: string;
-    promotion_type?: string;
+    target_type?: EcommapsPromotionTargetType | string;
+    promotion_type?: EcommapsPromotionType;
     message?: string;
 }
 
-declare class EcommapsAPIError extends Error {
-    status: number;
-    constructor(message: string, status: number);
+type QueryValue = string | number | boolean | null | undefined;
+type QueryParams = Record<string, QueryValue>;
+interface EcommapsClientConfig {
+    apiUrl?: string;
+    apiKey?: string;
+    fetch?: typeof fetch;
+    defaultHeaders?: HeadersInit;
 }
-declare const ecommapsClient: {
+interface EcommapsClient {
     store: {
         retrieve: (options?: RequestInit) => Promise<EcommapsSite>;
         menus: {
@@ -159,14 +249,22 @@ declare const ecommapsClient: {
             validate: (body: {
                 code: string;
                 cart_total?: number;
-                items?: any[];
+                items?: unknown[];
             }, options?: RequestInit) => Promise<EcommapsCouponValidateResponse>;
+        };
+        pages: {
+            list: (options?: RequestInit) => Promise<EcommapsPage[]>;
+            retrieve: (slug: string, options?: RequestInit) => Promise<EcommapsPage>;
+        };
+        blogs: {
+            list: (options?: RequestInit) => Promise<EcommapsBlog[]>;
+            retrieve: (slug: string, options?: RequestInit) => Promise<EcommapsBlog>;
         };
     };
     products: {
-        list: (params?: Record<string, string | number>, options?: RequestInit) => Promise<PaginatedResponse<EcommapsProduct>>;
+        list: (params?: QueryParams, options?: RequestInit) => Promise<PaginatedResponse<EcommapsProduct>>;
         retrieve: (slug: string, options?: RequestInit) => Promise<EcommapsProduct>;
-        search: (q: string, params?: Record<string, string | number>, options?: RequestInit) => Promise<EcommapsSearchResponse>;
+        search: (q: string, params?: QueryParams, options?: RequestInit) => Promise<EcommapsSearchResponse>;
     };
     collections: {
         list: (options?: RequestInit) => Promise<{
@@ -175,7 +273,7 @@ declare const ecommapsClient: {
         retrieve: (slug: string, limit?: number, offset?: number, options?: RequestInit) => Promise<{
             collection: EcommapsCollection;
             products: EcommapsProduct[];
-            pagination: any;
+            pagination: unknown;
         }>;
     };
     cart: {
@@ -192,37 +290,43 @@ declare const ecommapsClient: {
         removeItem: (cartId: string, itemId: string, options?: RequestInit) => Promise<EcommapsCart>;
     };
     orders: {
-        create: (body: any, options?: RequestInit) => Promise<any>;
-        retrieve: (orderNumber: string, options?: RequestInit) => Promise<any>;
+        create: (body: unknown, options?: RequestInit) => Promise<unknown>;
+        retrieve: (orderNumber: string, options?: RequestInit) => Promise<unknown>;
         list: (options?: RequestInit & {
             params?: {
                 limit?: number;
                 offset?: number;
             };
         }) => Promise<{
-            data: any[];
-            pagination: any;
+            data: unknown[];
+            pagination: unknown;
         }>;
     };
     auth: {
-        login: (body: any, options?: RequestInit) => Promise<EcommapsAuthResponse>;
-        signup: (body: any, options?: RequestInit) => Promise<EcommapsAuthResponse>;
+        login: (body: unknown, options?: RequestInit) => Promise<EcommapsAuthResponse>;
+        signup: (body: unknown, options?: RequestInit) => Promise<EcommapsAuthResponse>;
         me: (options?: RequestInit) => Promise<{
             customer: EcommapsCustomer;
         }>;
-        addAddress: (body: any, options?: RequestInit) => Promise<{
+        addAddress: (body: unknown, options?: RequestInit) => Promise<{
             success: boolean;
-            address: any;
+            address: unknown;
         }>;
         setDefaultAddress: (addressId: string, options?: RequestInit) => Promise<{
             success: boolean;
-            addresses: any[];
+            addresses: unknown[];
         }>;
         deleteAddress: (addressId: string, options?: RequestInit) => Promise<{
             success: boolean;
-            addresses: any[];
+            addresses: unknown[];
         }>;
     };
-};
+}
+declare class EcommapsAPIError extends Error {
+    status: number;
+    constructor(message: string, status: number);
+}
+declare function createEcommapsClient(config?: EcommapsClientConfig): EcommapsClient;
+declare const ecommapsClient: EcommapsClient;
 
-export { EcommapsAPIError, type EcommapsAppliedDiscount, type EcommapsAuthResponse, type EcommapsCart, type EcommapsCartItem, type EcommapsCollection, type EcommapsCouponValidateResponse, type EcommapsCustomer, type EcommapsMenu, type EcommapsMenuItem, type EcommapsProduct, type EcommapsProductVariant, type EcommapsSearchResponse, type EcommapsSite, type PaginatedResponse, type PaginationMeta, ecommapsClient };
+export { EcommapsAPIError, type EcommapsAddress, type EcommapsAuthResponse, type EcommapsBlog, type EcommapsCart, type EcommapsCartItem, type EcommapsClient, type EcommapsClientConfig, type EcommapsCollection, type EcommapsCouponValidateResponse, type EcommapsCustomer, type EcommapsDiscountType, type EcommapsImage, type EcommapsMenu, type EcommapsMenuItem, type EcommapsPage, type EcommapsProduct, type EcommapsProductOption, type EcommapsProductVariant, type EcommapsPromotion, type EcommapsPromotionTargetType, type EcommapsPromotionType, type EcommapsSearchResponse, type EcommapsSite, type JsonPrimitive, type JsonRecord, type JsonValue, type PaginatedResponse, type PaginationMeta, createEcommapsClient, ecommapsClient };
