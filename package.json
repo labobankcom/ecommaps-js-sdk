@@ -24,10 +24,7 @@
     "build": "tsup src/index.ts --format cjs,esm --dts",
     "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
     "typecheck": "tsc --noEmit",
-<<<<<<< HEAD
-=======
     "pack:dry-run": "npm pack --dry-run --workspaces=false",
->>>>>>> 3c75581 (feat: typed order contracts and sdk hardening)
     "lint": "eslint src/",
     "clean": "rm -rf dist node_modules"
   },
@@ -40,7 +37,7 @@
   "license": "ISC",
   "repository": {
     "type": "git",
-    "url": "https://github.com/labobankcom/ecommaps-js-sdk.git"
+    "url": "git+https://github.com/labobankcom/ecommaps-js-sdk.git"
   },
   "bugs": {
     "url": "https://github.com/labobankcom/ecommaps-js-sdk/issues"
